@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { editImageWeather } from '../services/geminiService';
 
@@ -53,8 +52,9 @@ export const useImageEditing = () => {
         reader.readAsDataURL(file);
     }, [reset]);
 
-    const processImage = useCallback(async (prompt: string) => {
-        if (!originalImage || !originalFile) {
+    const processImage = useCallback(async (prompt: string, maskDataUrl?: string | null) => {
+        const sourceImage = editedImage || originalImage;
+        if (!sourceImage || !originalFile) {
             setError("Please upload an image first.");
             return;
         }
@@ -63,15 +63,18 @@ export const useImageEditing = () => {
         setError(null);
 
         try {
-            const base64Data = originalImage.split(',')[1];
+            const base64Data = sourceImage.split(',')[1];
             if (!base64Data) {
                 throw new Error("Invalid image data format.");
             }
 
-            const newImageData = await editImageWeather(base64Data, originalFile.type, prompt);
+            const maskBase64Data = maskDataUrl ? maskDataUrl.split(',')[1] : null;
+
+            const newImageData = await editImageWeather(base64Data, originalFile.type, prompt, maskBase64Data);
             const newImageSrc = `data:${originalFile.type};base64,${newImageData}`;
 
             const newHistoryEntry: EditHistory = { imageData: newImageSrc, prompt };
+            // Clear any "redo" history if a new edit is made
             const newHistory = [...history.slice(0, historyIndex + 1), newHistoryEntry];
 
             setHistory(newHistory);
@@ -83,7 +86,7 @@ export const useImageEditing = () => {
         } finally {
             setIsLoading(false);
         }
-    }, [originalImage, originalFile, history, historyIndex]);
+    }, [originalImage, editedImage, originalFile, history, historyIndex]);
 
     const undo = useCallback(() => {
         if (canUndo) {
