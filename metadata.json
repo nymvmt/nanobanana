@@ -1,0 +1,5 @@
+{
+  "name": "AI Weather Changer",
+  "description": "An AI-powered photo editor that changes the weather in your photos. Using Gemini's Nano Banana model, it modifies lighting, sky, and mood while preserving the original subjects and composition.",
+  "requestFramePermissions": []
+}
