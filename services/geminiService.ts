@@ -9,6 +9,15 @@ const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 const model = 'gemini-2.5-flash-image-preview';
 
 const getMasterPrompt = (userPrompt: string, hasMask: boolean) => {
+    const isDarkPrompt = (prompt: string): boolean => {
+        const keywords = ['night', 'sunset', 'storm', 'dark', 'aurora'];
+        return keywords.some(k => prompt.toLowerCase().includes(k));
+    };
+
+    const lightingInstruction = isDarkPrompt(userPrompt)
+        ? `**For this dark scene, you MUST add a subtle, natural-looking light source illuminating the people.** This prevents them from being lost in shadow and makes them the focal point. The light should look realistic, as if from the moon, a distant street lamp, or a warm glow. It must be soft and not a harsh spotlight.`
+        : `It should be a gentle color shift or shadow adjustment, NOT a re-drawing of their features.`;
+
     if (hasMask) {
         return `You are a meticulous photo retoucher AI. Your single most important job is to preserve the people in the photo perfectly, especially their faces. Any change to a person's face, identity, or expression is a total failure.
 
@@ -24,7 +33,7 @@ Your task is to apply the text prompt's effect ONLY to the WHITE areas of the ma
 
 3.  **PEOPLE ARE ALWAYS PROTECTED (HIGHEST PRIORITY):** This rule overrides all others.
     *   **If a person is in a BLACK area:** They are already protected by Rule #1. Do not touch them.
-    *   **If a person is in a WHITE area:** You MUST preserve their identity, face, expression, pose, and clothing perfectly. The ONLY change you are allowed to make is to *subtly adjust the lighting and shadows on them* to match the new atmosphere. Any other change to a person is a failure. Do not redraw their face.
+    *   **If a person is in a WHITE area:** You MUST preserve their identity, face, expression, pose, and clothing perfectly. The ONLY change you are allowed to make is to *subtly adjust the lighting and shadows on them* to match the new atmosphere. ${lightingInstruction}
 
 **Failure condition:** If you alter the identity or facial expression of any person, OR if you change anything in the black masked areas, you have failed the task.
 
@@ -45,7 +54,8 @@ This means you should change:
     *   **FACES & IDENTITY:** The person's face, features, and identity MUST remain 100% identical to the original. DO NOT change their facial expression.
     *   **POSE & CLOTHING:** The person's pose, clothes, and position must not be altered.
 2.  **DO NOT CHANGE OBJECTS:** Do not add, remove, or alter any objects, buildings, or landscape features that are not directly related to the weather effect.
-3.  **SUBTLY ADJUST LIGHTING ON PEOPLE:** To make the image look realistic, you MUST subtly adjust the lighting and shadows on the people to match the new atmosphere. This is the ONLY permitted change to a person. It should be a gentle color shift or shadow adjustment, NOT a re-drawing of their features.
+3.  **REALISTICALLY ADJUST LIGHTING ON PEOPLE:** To make the image look realistic, you MUST subtly adjust the lighting and shadows on the people to match the new atmosphere. This is the ONLY permitted change to a person.
+    *   ${lightingInstruction}
 
 **Failure condition:** If you alter the identity or facial expression of any person, you have failed the task.
 

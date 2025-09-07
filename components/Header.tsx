@@ -32,7 +32,7 @@ const Header: React.FC = () => {
       <div className="container mx-auto flex items-center justify-center gap-3">
         <WeatherIcon className="w-8 h-8 text-blue-400" />
         <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
-          AI Weather Changer
+          AI Weather Wizard
         </h1>
       </div>
     </header>
